@@ -1,0 +1,10 @@
+{
+	"id": "copy-image-hotkey",
+	"name": "Copy Image Hotkey",
+	"version": "0.1.0",
+	"minAppVersion": "1.4.0",
+	"description": "Cmd+C copies the actual image when an image embed is selected in source mode.",
+	"author": "Ali Irani",
+	"authorUrl": "https://github.com/aliir74",
+	"isDesktopOnly": true
+}
