@@ -10,8 +10,6 @@ This plugin makes Cmd+C just work: select the image embed, copy, paste anywhere.
 
 ## Demo
 
-<!-- TODO: replace with a real demo GIF before announcing -->
-
 ![demo](docs/demo.gif)
 
 ## How it works
