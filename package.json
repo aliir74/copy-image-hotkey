@@ -1,6 +1,6 @@
 {
 	"name": "copy-image-hotkey",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"description": "Cmd+C copies the actual image when an image embed is selected in source mode.",
 	"main": "main.js",
 	"type": "module",

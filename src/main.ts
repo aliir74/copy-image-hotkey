@@ -16,33 +16,29 @@ const MIME_TYPES: Record<string, string> = {
 
 export default class CopyImageHotkeyPlugin extends Plugin {
   private selectedImg: HTMLImageElement | null = null;
-  private cachedBlob: Blob | null = null;
 
-  async onload(): Promise<void> {
-    // Track clicks on images — preload blob immediately for instant copy
+  onload(): void {
+    // Track which image is currently clicked so Cmd+C can copy it
     this.registerDomEvent(document, "click", (evt: MouseEvent) => {
-      const target = evt.target as HTMLElement;
+      const target = evt.target;
       if (
         target instanceof HTMLImageElement &&
         this.isVaultImage(target)
       ) {
         this.selectedImg = target;
-        this.cachedBlob = null;
-        void this.preloadImageBlob(target);
       } else {
         this.selectedImg = null;
-        this.cachedBlob = null;
       }
     });
 
-    // Handle Cmd+C / Ctrl+C before the copy event for clicked images
+    // Cmd+C / Ctrl+C on a clicked image
     this.registerDomEvent(document, "keydown", (evt: KeyboardEvent) => {
       if ((evt.metaKey || evt.ctrlKey) && evt.key === "c") {
         this.handleKeyboardCopy(evt);
       }
     });
 
-    // Handle copy event for text selections (source mode ![[image.png]])
+    // Copy event for text selections (source-mode ![[image.png]] or rendered <img>)
     this.registerDomEvent(document, "copy", (evt: ClipboardEvent) => {
       this.handleCopyEvent(evt);
     });
@@ -57,29 +53,15 @@ export default class CopyImageHotkeyPlugin extends Plugin {
   handleKeyboardCopy(evt: KeyboardEvent): void {
     if (!this.selectedImg || !document.body.contains(this.selectedImg)) return;
 
-    evt.preventDefault();
+    const filename = this.extractFilenameFromImg(this.selectedImg);
+    if (!filename) return;
+    const extMatch = filename.match(IMAGE_EXT_RE);
+    if (!extMatch || !extMatch[1]) return;
+    const mimeType = MIME_TYPES[extMatch[1].toLowerCase()];
+    if (!mimeType) return;
 
-    // Use preloaded blob if ready (instant), otherwise fall back to vault read
-    if (this.cachedBlob) {
-      const blob = this.cachedBlob;
-      navigator.clipboard
-        .write([new ClipboardItem({ [blob.type]: blob })])
-        .then(() => {
-          new Notice("Image copied to clipboard!");
-        })
-        .catch((err: unknown) => {
-          console.error("copy-image-hotkey:", err);
-          new Notice("Failed to copy image: " + (err as Error).message);
-        });
-    } else {
-      const filename = this.extractFilenameFromImg(this.selectedImg);
-      if (!filename) return;
-      const extMatch = filename.match(IMAGE_EXT_RE);
-      if (!extMatch || !extMatch[1]) return;
-      const mimeType = MIME_TYPES[extMatch[1].toLowerCase()];
-      if (!mimeType) return;
-      void this.copyImageToClipboard(filename, mimeType);
-    }
+    evt.preventDefault();
+    void this.copyImageToClipboard(filename, mimeType);
   }
 
   handleCopyEvent(evt: ClipboardEvent): void {
@@ -117,18 +99,6 @@ export default class CopyImageHotkeyPlugin extends Plugin {
     void this.copyImageToClipboard(filename, mimeType);
   }
 
-  async preloadImageBlob(img: HTMLImageElement): Promise<void> {
-    try {
-      const src = img.getAttribute("src");
-      if (!src) return;
-      const resp = await fetch(src);
-      this.cachedBlob = await resp.blob();
-    } catch (e) {
-      // Fall back to vault read on copy
-      this.cachedBlob = null;
-    }
-  }
-
   extractFilenameFromImg(img: HTMLImageElement): string | null {
     // Try alt attribute first (most reliable in Obsidian)
     const alt = img.getAttribute("alt");
@@ -144,7 +114,7 @@ export default class CopyImageHotkeyPlugin extends Plugin {
         if (!last) return null;
         const basename = last.split("?")[0];
         if (basename && IMAGE_EXT_RE.test(basename)) return basename;
-      } catch (e) {
+      } catch {
         // ignore decode errors
       }
     }
