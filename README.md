@@ -1,5 +1,8 @@
 # Copy Image Hotkey
 
+[![GitHub Sponsors](https://img.shields.io/badge/sponsor-30363D?style=for-the-badge&logo=GitHub-Sponsors&logoColor=#EA4AAA)](https://github.com/sponsors/aliir74)
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/aliir74)
+
 Cmd+C (or Ctrl+C) copies the **actual image** to your clipboard when an image embed is selected in an Obsidian note — instead of copying the wikilink text.
 
 ## Why
@@ -50,6 +53,14 @@ While the plugin is awaiting community-plugin approval, install via [BRAT](https
 
 - Desktop-only (uses the `navigator.clipboard.write` API with `ClipboardItem`).
 - The plugin doesn't bind a custom hotkey — it intercepts the existing system copy. If you've remapped copy elsewhere, the plugin will still trigger off whichever key fires the `copy` event.
+
+## Support This Project
+
+If you find this project useful, consider supporting its development:
+
+- Star this repo
+- Report bugs and submit PRs
+- [Sponsor on GitHub](https://github.com/sponsors/aliir74) or [Buy me a coffee](https://www.buymeacoffee.com/aliir74)
 
 ## License
 
